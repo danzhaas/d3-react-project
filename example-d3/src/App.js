@@ -1,12 +1,10 @@
 import React from 'react';
-import Test from './Test';
+import ChartWrapper from './ChartWrapper'
 
 function App() {
   return (
     <div className="App">
-      <Test person="Tony" />
-      <Test person="Mary" />
-      <Test person="Fred" />
+      <ChartWrapper />
     </div>
   );
 }
