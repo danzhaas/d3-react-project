@@ -8,52 +8,65 @@ const HEIGHT = 500-MARGIN.TOP-MARGIN.BOTTOM;
 
 
 export default class D3Chart {
-    constructor(element) {
-        const svg = d3.select(element)
+    constructor(element) {  // These are rendered only once: when the page is loaded.  
+        const vis = this;
+        
+        vis.svg = d3.select(element)  // appending canvas and moving to center of screen.  Only want this to run once
         .append("svg")
             .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT )
             .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
         .append("g")
             .attr("transform", `translate(${MARGIN.LEFT},${MARGIN.TOP})`)
-
-    d3.json(url).then(data => {
-        // data = [ {"height":Number, "name":String} ]
-        const y = d3.scaleLinear()
-            .domain([
-                d3.min(data, d => {return d.height}) * 0.95, 
-                d3.max(data, d => {return d.height})
-            ])
-            .range([HEIGHT,0])
-
-        const x = d3.scaleBand()
-            .domain(data.map(item => item.name))
-            .range([0,WIDTH])
-            .padding(0.4)
-
-        const xAxisCall = d3.axisBottom(x)
-        svg.append("g")
-            .attr("transform", `translate(0, ${HEIGHT})`)
-            .call(xAxisCall)
-
-        const yAxisCall = d3.axisLeft(y)
-        svg.append("g")
-            .call(yAxisCall)
-
-        svg.append("text")
+        
+        vis.svg.append("text")  // Axis labels: only should be appended to the canvas once
             .attr("x", WIDTH/2)
             .attr("y", HEIGHT+50)
             .attr("text-anchor", "middle")
             .text("The World's Five Tallest Men")
 
-        svg.append("text")
+        vis.svg.append("text")
             .attr("x", -HEIGHT / 2)
             .attr("y", -50)
             .attr("text-anchor", "middle")
             .text("Height in cm")
             .attr("transform", "rotate(-90)")
 
-        const rects = svg.selectAll("rect")
-            .data(data)
+        vis.xAxisGroup = vis.svg.append("g")
+        .attr("transform", `translate(0, ${HEIGHT})`)
+
+        vis.yAxisGroup = vis.svg.append("g")
+
+        d3.json(url).then(data => { // data loading function; don't need to look at data frequently unless it's dynamic
+        vis.data = data;    
+        d3.interval(() => { // 
+                vis.update()
+            }, 1000)
+        })
+    }
+
+    update() {  // called every time we change the data - important for dynamic views or data.  This should include x and y scales, x and y axes, and all rectangles.
+        const vis = this;
+
+        const y = d3.scaleLinear()
+        .domain([   // needs an update whenever page scale changes
+            d3.min(vis.data, d => {return d.height}) * 0.95, 
+            d3.max(vis.data, d => {return d.height})
+        ])
+        .range([HEIGHT,0])
+
+        const x = d3.scaleBand()
+            .domain(vis.data.map(item => item.name))
+            .range([0,WIDTH])
+            .padding(0.4)
+
+        const xAxisCall = d3.axisBottom(x)  
+            vis.xAxisGroup.call(xAxisCall)
+
+        const yAxisCall = d3.axisLeft(y)  
+            vis.yAxisGroup.call(yAxisCall)
+
+        const rects = vis.svg.selectAll("rect")
+            .data(vis.data)
 
         rects.enter()
             .append("rect")
@@ -62,6 +75,5 @@ export default class D3Chart {
                 .attr("width", x.bandwidth)
                 .attr("height", d => HEIGHT - y(d.height))
                 .attr("fill", "grey")
-        })
     }
 }
