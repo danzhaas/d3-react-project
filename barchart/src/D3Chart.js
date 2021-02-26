@@ -65,10 +65,25 @@ export default class D3Chart {
         const yAxisCall = d3.axisLeft(y)  
             vis.yAxisGroup.call(yAxisCall)
 
+        //DATA JOIN
         const rects = vis.svg.selectAll("rect")
             .data(vis.data)
 
-        rects.enter()
+        // EXIT
+        rects
+            .exit()
+            .remove()
+
+        //UPDATE
+        rects
+            .attr("x", d => x(d.name))
+            .attr("y", d => y(d.height))
+            .attr("width", x.bandwidth)
+            .attr("height", d => HEIGHT - y(d.height))
+
+        // ENTER
+        rects
+            .enter()
             .append("rect")
                 .attr("x", d => x(d.name))
                 .attr("y", d => y(d.height))
