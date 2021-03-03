@@ -1,7 +1,9 @@
 import * as d3 from 'd3'
 
-const url = "https://udemy-react-d3.firebaseio.com/tallest_men.json"
-// data = [ {"height":Number, "name":String} ]
+const url1 = "https://udemy-react-d3.firebaseio.com/tallest_men.json"
+const url2 = "https://udemy-react-d3.firebaseio.com/tallest_women.json"
+
+// data format = [ {"height":Number, "name":String} ]
 const MARGIN = { TOP:10, BOTTOM:50, LEFT:75, RIGHT:10 }
 const WIDTH = 800-MARGIN.LEFT-MARGIN.RIGHT;
 const HEIGHT = 500-MARGIN.TOP-MARGIN.BOTTOM;
@@ -36,12 +38,19 @@ export default class D3Chart {
 
         vis.yAxisGroup = vis.svg.append("g")
 
-        d3.json(url).then(data => { // data loading function; don't need to look at data frequently unless it's dynamic
-        vis.data = data;    
-        d3.interval(() => { // 
-                vis.update()
-            }, 1000)
-        })
+        Promise.all([
+            d3.json(url1),
+            d3.json(url2)
+        ]).then((datasets) => {
+            console.log(datasets)
+        });
+
+        // d3.json(url1).then(data => { // data loading function; don't need to look at data frequently unless it's dynamic
+        // vis.data = data;    
+        // d3.interval(() => { // 
+        //         vis.update()
+        //     }, 1000)
+        // })
     }
 
     update() {  // called every time we change the data - important for dynamic views or data.  This should include x and y scales, x and y axes, and all rectangles.
