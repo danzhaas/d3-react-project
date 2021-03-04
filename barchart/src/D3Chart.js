@@ -42,15 +42,17 @@ export default class D3Chart {
             d3.json(url1),
             d3.json(url2)
         ]).then((datasets) => {
-            console.log(datasets)
-        });
+            const [men, women] = datasets
+            let flag = true
 
-        // d3.json(url1).then(data => { // data loading function; don't need to look at data frequently unless it's dynamic
-        // vis.data = data;    
-        // d3.interval(() => { // 
-        //         vis.update()
-        //     }, 1000)
-        // })
+            vis.update()
+
+            d3.interval(() => { 
+                vis.data = flag ? men : women
+                vis.update()
+                flag =! flag
+            }, 1000)
+        })
     }
 
     update() {  // called every time we change the data - important for dynamic views or data.  This should include x and y scales, x and y axes, and all rectangles.
