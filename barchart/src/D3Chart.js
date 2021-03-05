@@ -45,7 +45,7 @@ export default class D3Chart {
             const [men, women] = datasets
             let flag = true
 
-            vis.update()
+            // vis.update()
 
             d3.interval(() => { 
                 vis.data = flag ? men : women
@@ -71,22 +71,30 @@ export default class D3Chart {
             .padding(0.4)
 
         const xAxisCall = d3.axisBottom(x)  
-            vis.xAxisGroup.call(xAxisCall)
+            vis.xAxisGroup
+                .transition().duration(500)    
+                .call(xAxisCall)
 
         const yAxisCall = d3.axisLeft(y)  
-            vis.yAxisGroup.call(yAxisCall)
+            vis.yAxisGroup
+                .transition().duration(500)
+                .call(yAxisCall)
 
-        //DATA JOIN
+        // LIFE CYCLE OF UPDATING VISUALIZED DATA
+        // DATA JOIN
         const rects = vis.svg.selectAll("rect")
             .data(vis.data)
 
         // EXIT
         rects
             .exit()
+            .transition().duration(500)
+            .attr("height", 0)
+            .attr("y", HEIGHT)
             .remove()
 
-        //UPDATE
-        rects
+        // UPDATE
+        rects.transition().duration(500)
             .attr("x", d => x(d.name))
             .attr("y", d => y(d.height))
             .attr("width", x.bandwidth)
@@ -97,9 +105,11 @@ export default class D3Chart {
             .enter()
             .append("rect")
                 .attr("x", d => x(d.name))
-                .attr("y", d => y(d.height))
-                .attr("width", x.bandwidth)
-                .attr("height", d => HEIGHT - y(d.height))
+                .attr("width", x.bandwidth)                
                 .attr("fill", "grey")
+                .attr("y", HEIGHT)
+                .transition().duration(500)
+                    .attr("height", d => HEIGHT - y(d.height))
+                    .attr("y", d => y(d.height))
     }
 }
